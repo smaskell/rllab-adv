@@ -39,11 +39,11 @@ parser.add_argument('--folder', type=str, default=os.environ['HOME'], help='fold
 
 
 def count_catastrophies(observations):
-    catastrophies = 0
+    count = 0
     for episode in observations:
         if len(episode) < 200:
-            catastrophies += 1
-    return catastrophies
+            count += 1
+    return count
 
 ## Parsing Arguments ##
 args = parser.parse_args()
