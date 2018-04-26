@@ -131,12 +131,14 @@ class BatchPolopt(RLAlgorithm):
 
     def train(self):
         self.rews = []
+        self.observations = []
         for itr in range(0, self.n_itr):
             #with logger.prefix('itr #%d | ' % itr):
             with logger.prefix(''):
                 logger.log('itr #%d | ' % itr)
                 all_paths = self.sampler.obtain_samples(itr)
                 paths = self.get_agent_paths(all_paths, is_protagonist=self.is_protagonist)
+                self.observations.extend(self.get_observations(paths))
                 #from IPython import embed; embed()
                 samples_data = self.sampler.process_samples(itr, paths)
                 self.log_diagnostics(paths)
@@ -181,6 +183,12 @@ class BatchPolopt(RLAlgorithm):
         for p in paths:
             sum_r +=p['rewards'].sum()
         return sum_r/len(paths)
+
+    def get_observations(self, paths):
+        observations = []
+        for p in paths:
+            observations.append(p['observations'])
+        return observations
 
     def log_diagnostics(self, paths):
         self.env.log_diagnostics(paths)

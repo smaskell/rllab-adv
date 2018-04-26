@@ -36,6 +36,13 @@ parser.add_argument('--gae_lambda', type=float, default=0.97, help='gae_lambda f
 parser.add_argument('--folder', type=str, default=os.environ['HOME'], help='folder to save result in')
 
 
+def count_catastrophies(observations):
+    catastrophies = 0
+    for episode in observations:
+        if len(episode) < 200:
+            catastrophies += 1
+    return catastrophies
+
 ## Parsing Arguments ##
 args = parser.parse_args()
 env_name = args.env
@@ -154,6 +161,7 @@ for ne in range(n_exps):
         pro_algo.train()
         pro_rews += pro_algo.rews; all_rews += pro_algo.rews;
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
+        logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations), len(pro_algo.observations)))
         ## Train Adversary
         adv_algo.train()
         adv_rews += adv_algo.rews; all_rews += adv_algo.rews;
