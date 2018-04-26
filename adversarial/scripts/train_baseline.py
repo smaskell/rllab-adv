@@ -80,7 +80,7 @@ def add_catastrophies(observations):
         num_episodes += 1
         if len(episode) < 200:
             num_catastrophies += 1
-            catastrophies.append((num_episodes, catastrophies))
+            catastrophies.append((num_episodes, num_catastrophies))
 
 
 ## Looping over experiments to carry out ##
