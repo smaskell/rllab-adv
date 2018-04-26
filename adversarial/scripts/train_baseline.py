@@ -68,15 +68,18 @@ timestamp = int(time.time())
 
 global catastrophies
 global num_episodes
+global num_catastrophies
 catastrophies = [(0, 0)]
 num_episodes = 0
+num_catastrophies = 0
 def add_catastrophies(observations):
     global catastrophies
     global num_episodes
+    global num_catastrophies
     for episode in observations:
         num_episodes += 1
         if len(episode) < 200:
-            catastrophies += 1
+            num_catastrophies += 1
             catastrophies.append((num_episodes, catastrophies))
 
 
