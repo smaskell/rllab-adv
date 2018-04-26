@@ -1,3 +1,5 @@
+import time
+
 from rllab.algos.trpo import TRPO
 from rllab.baselines.linear_feature_baseline import LinearFeatureBaseline
 from rllab.envs.gym_env import GymEnv
@@ -62,16 +64,19 @@ step_size = args.step_size
 gae_lambda = args.gae_lambda
 save_dir = args.folder
 
-## Initializing summaries for the tests ##
-const_test_rew_summary = []
-rand_test_rew_summary = []
-step_test_rew_summary = []
-rand_step_test_rew_summary = []
-adv_test_rew_summary = []
+timestamp = int(time.time())
 
-## Preparing file to save results in ##
-save_prefix = 'env-{}_Exp{}_Itr{}_BS{}_Adv{}_stp{}_lam{}_{}'.format(env_name, n_exps, n_itr, batch_size, adv_fraction, step_size, gae_lambda, random.randint(0,1000000))
-save_name = save_dir+'/'+save_prefix+'.p'
+global catastrophies
+global num_episodes
+catastrophies = [(0, 0)]
+num_episodes = 0
+def add_catastrophies(observations):
+    for episode in observations:
+        num_episodes += 1
+        if len(episode) < 200:
+            catastrophies += 1
+            catastrophies.append((num_episodes, catastrophies))
+
 
 ## Looping over experiments to carry out ##
 for ne in range(n_exps):
@@ -95,12 +100,6 @@ for ne in range(n_exps):
         constant_val = 0.0
     )
 
-    ## Adversary policy definition ##
-    adv_policy = GaussianMLPPolicy(
-        env_spec=env.spec,
-        hidden_sizes=layer_size,
-        is_protagonist=False
-    )
     adv_baseline = LinearFeatureBaseline(env_spec=env.spec)
 
     ## Initializing the parallel sampler ##
@@ -122,70 +121,21 @@ for ne in range(n_exps):
         is_protagonist=True
     )
 
-    ## Setting up summaries for testing for a specific training instance ##
-    pro_rews = []
-    adv_rews = []
-    all_rews = []
-    const_testing_rews = []
-    const_testing_rews.append(test_const_adv(env_orig, pro_policy, path_length=path_length))
-    rand_testing_rews = []
-    rand_testing_rews.append(test_rand_adv(env_orig, pro_policy, path_length=path_length))
-    step_testing_rews = []
-    step_testing_rews.append(test_step_adv(env_orig, pro_policy, path_length=path_length))
-    rand_step_testing_rews = []
-    rand_step_testing_rews.append(test_rand_step_adv(env_orig, pro_policy, path_length=path_length))
-    adv_testing_rews = []
-    adv_testing_rews.append(test_learnt_adv(env, pro_policy, adv_policy, path_length=path_length))
-
     ## Beginning alternating optimization ##
     for ni in range(n_itr):
         logger.log('\n\n\n####expNO{} global itr# {} n_pro_itr# {}####\n\n\n'.format(ne,ni,args.n_pro_itr))
         ## Train protagonist
         pro_algo.train()
-        pro_rews += pro_algo.rews; all_rews += pro_algo.rews;
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
         logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations), len(pro_algo.observations)))
-        ## Test the learnt policies
-        const_testing_rews.append(test_const_adv(env, pro_policy, path_length=path_length))
-        rand_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
-        step_testing_rews.append(test_step_adv(env, pro_policy, path_length=path_length))
-        rand_step_testing_rews.append(test_rand_step_adv(env, pro_policy, path_length=path_length))
-        adv_testing_rews.append(test_learnt_adv(env, pro_policy, adv_policy, path_length=path_length))
-
-        if ni%afterRender==0 and ifRender==True:
-            test_const_adv(env, pro_policy, path_length=path_length, n_traj=1, render=True);
-
-        if ni!=0 and ni%save_every==0:
-            ## SAVING CHECKPOINT INFO ##
-            pickle.dump({'args': args,
-                         'pro_policy': pro_policy,
-                         'adv_policy': adv_policy,
-                         'zero_test': const_test_rew_summary,
-                         'rand_test': rand_test_rew_summary,
-                         'step_test': step_test_rew_summary,
-                         'rand_step_test': rand_step_test_rew_summary,
-                         'iter_save': ni,
-                         'exp_save': ne,
-                         'adv_test': adv_test_rew_summary}, open(save_name+'.temp','wb'))
 
     ## Shutting down the optimizer ##
     pro_algo.shutdown_worker()
 
-    ## Updating the test summaries over all training instances
-    const_test_rew_summary.append(const_testing_rews)
-    rand_test_rew_summary.append(rand_testing_rews)
-    step_test_rew_summary.append(step_testing_rews)
-    rand_step_test_rew_summary.append(rand_step_testing_rews)
-    adv_test_rew_summary.append(adv_testing_rews)
+with open('catastrophies-baseline-{}.csv'.format(timestamp)) as file:
+    for ep, cat in catastrophies:
+        file.write("{}, {}\n".format(ep, cat))
 
-## SAVING INFO ##
-pickle.dump({'args': args,
-             'pro_policy': pro_policy,
-             'adv_policy': adv_policy,
-             'zero_test': const_test_rew_summary,
-             'rand_test': rand_test_rew_summary,
-             'step_test': step_test_rew_summary,
-             'rand_step_test': rand_step_test_rew_summary,
-             'adv_test': adv_test_rew_summary}, open(save_name,'wb'))
+
 
 logger.log('\n\n\n#### DONE ####\n\n\n')
