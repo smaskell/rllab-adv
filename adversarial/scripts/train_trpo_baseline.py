@@ -37,6 +37,13 @@ parser.add_argument('--gae_lambda', type=float, default=0.97, help='gae_lambda f
 
 args = parser.parse_args()
 
+def count_catastrophies(observations):
+    catastrophies = 0
+    for episode in observations:
+        if len(episode) < 200:
+            catastrophies += 1
+    return catastrophies
+
 ## Number of experiments to run ##
 env_name = args.env
 adv_name = 'no_adv'
@@ -124,6 +131,8 @@ for ne in range(n_exps):
         pro_algo.train()
         pro_rews += pro_algo.rews; all_rews += pro_algo.rews;
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
+        logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations),
+                                                            len(pro_algo.observations)))
         const_testing_rews.append(test_const_adv(env, pro_policy, path_length=path_length))
         rand_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
         step_testing_rews.append(test_step_adv(env, pro_policy, path_length=path_length))
