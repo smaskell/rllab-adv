@@ -71,6 +71,8 @@ global num_episodes
 catastrophies = [(0, 0)]
 num_episodes = 0
 def add_catastrophies(observations):
+    global catastrophies
+    global num_episodes
     for episode in observations:
         num_episodes += 1
         if len(episode) < 200:
