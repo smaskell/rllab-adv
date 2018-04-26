@@ -128,6 +128,7 @@ for ne in range(n_exps):
         pro_algo.train()
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
         logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations), len(pro_algo.observations)))
+        add_catastrophies(pro_algo.observations)
 
     ## Shutting down the optimizer ##
     pro_algo.shutdown_worker()
