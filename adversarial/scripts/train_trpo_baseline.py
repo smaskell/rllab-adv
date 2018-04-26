@@ -133,38 +133,38 @@ for ne in range(n_exps):
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
         logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations),
                                                             len(pro_algo.observations)))
-        const_testing_rews.append(test_const_adv(env, pro_policy, path_length=path_length))
-        rand_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
-        step_testing_rews.append(test_step_adv(env, pro_policy, path_length=path_length))
-        rand_step_testing_rews.append(test_rand_step_adv(env, pro_policy, path_length=path_length))
-        adv_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
-        if ni!=0 and ni%save_every==0:
-            ## SAVING INFO ##
-            pickle.dump({'args': args,
-                         'pro_policy': pro_policy,
-                         'zero_test': const_test_rew_summary,
-                         'rand_test': rand_test_rew_summary,
-                         'step_test': step_test_rew_summary,
-                         'rand_step_test': rand_step_test_rew_summary,
-                         'iter_save': ni,
-                         'exp_save': ne,
-                         'adv_test': adv_test_rew_summary}, open(save_name+'.temp','wb'))
-
-    ## Shutting down the optimizer ##
-    pro_algo.shutdown_worker()
-    const_test_rew_summary.append(const_testing_rews)
-    rand_test_rew_summary.append(rand_testing_rews)
-    step_test_rew_summary.append(step_testing_rews)
-    rand_step_test_rew_summary.append(rand_step_testing_rews)
-    adv_test_rew_summary.append(adv_testing_rews)
-
-## SAVING INFO ##
-pickle.dump({'args': args,
-             'pro_policy': pro_policy,
-             'zero_test': const_test_rew_summary,
-             'rand_test': rand_test_rew_summary,
-             'step_test': step_test_rew_summary,
-             'rand_step_test': rand_step_test_rew_summary,
-             'adv_test': adv_test_rew_summary}, open(save_name,'wb'))
+#         const_testing_rews.append(test_const_adv(env, pro_policy, path_length=path_length))
+#         rand_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
+#         step_testing_rews.append(test_step_adv(env, pro_policy, path_length=path_length))
+#         rand_step_testing_rews.append(test_rand_step_adv(env, pro_policy, path_length=path_length))
+#         adv_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
+#         if ni!=0 and ni%save_every==0:
+#             ## SAVING INFO ##
+#             pickle.dump({'args': args,
+#                          'pro_policy': pro_policy,
+#                          'zero_test': const_test_rew_summary,
+#                          'rand_test': rand_test_rew_summary,
+#                          'step_test': step_test_rew_summary,
+#                          'rand_step_test': rand_step_test_rew_summary,
+#                          'iter_save': ni,
+#                          'exp_save': ne,
+#                          'adv_test': adv_test_rew_summary}, open(save_name+'.temp','wb'))
+#
+#     ## Shutting down the optimizer ##
+#     pro_algo.shutdown_worker()
+#     const_test_rew_summary.append(const_testing_rews)
+#     rand_test_rew_summary.append(rand_testing_rews)
+#     step_test_rew_summary.append(step_testing_rews)
+#     rand_step_test_rew_summary.append(rand_step_testing_rews)
+#     adv_test_rew_summary.append(adv_testing_rews)
+#
+# ## SAVING INFO ##
+# pickle.dump({'args': args,
+#              'pro_policy': pro_policy,
+#              'zero_test': const_test_rew_summary,
+#              'rand_test': rand_test_rew_summary,
+#              'step_test': step_test_rew_summary,
+#              'rand_step_test': rand_step_test_rew_summary,
+#              'adv_test': adv_test_rew_summary}, open(save_name,'wb'))
 
 logger.log('\n\n\n#### DONE ####\n\n\n')
