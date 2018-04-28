@@ -191,12 +191,13 @@ class NPO(BatchPolopt):
             return
         observations = []
 
-        for path in samples_data.paths:
+        for path in samples_data['paths']:
             observations.append(path['observations'])
 
-        old_advantage = samples_data.advantages
+        old_advantage = samples_data['advantages']
         advantage = []
 
+        actions = 0
         for obvs_list in observations:
             if len(obvs_list) < 200:
                 good = obvs_list[:-fear_radius]
@@ -207,7 +208,8 @@ class NPO(BatchPolopt):
                 self.good_states.extend(obvs_list)
 
             for observation in obvs_list[:-1]:
-                adv = old_advantage[self.total_actions]
+                adv = old_advantage[actions]
+                actions += 1
                 self.total_actions += 1
                 scaled_fear_factor = min(fear_factor, fear_factor * self.total_actions / fear_fade_in)
                 fear = scaled_fear_factor * self.danger_model.predict(observation)
@@ -216,7 +218,7 @@ class NPO(BatchPolopt):
             advantage.append(old_advantage[-1])
             self.total_actions += 1
 
-        samples_data.advantages = np.array(advantage)
+        samples_data['advantages'] = np.array(advantage)
 
         train_good = sample(self.good_states, min(len(self.good_states), 64))
         train_danger = sample(self.danger_states, min(len(self.danger_states), 64))
