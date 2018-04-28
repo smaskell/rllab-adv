@@ -191,7 +191,9 @@ class NPO(BatchPolopt):
             return
         observations = []
 
+        print("collecting observations from", len(samples_data['paths']), "paths")
         for path in samples_data['paths']:
+            print("adding", len(path['observations']), "observations")
             observations.append(path['observations'])
 
         old_advantage = samples_data['advantages']
