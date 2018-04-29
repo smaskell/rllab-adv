@@ -67,20 +67,20 @@ save_dir = args.folder
 timestamp = int(time.time())
 
 global catastrophies
-global num_episodes
+global total_actions
 global num_catastrophies
 catastrophies = [(0, 0)]
-num_episodes = 0
+total_actions = 0
 num_catastrophies = 0
 def add_catastrophies(observations):
     global catastrophies
-    global num_episodes
+    global total_actions
     global num_catastrophies
     for episode in observations:
-        num_episodes += 1
+        total_actions += len(episode)
         if len(episode) < 200:
             num_catastrophies += 1
-            catastrophies.append((num_episodes, num_catastrophies))
+            catastrophies.append((total_actions, num_catastrophies))
 
 
 ## Looping over experiments to carry out ##
