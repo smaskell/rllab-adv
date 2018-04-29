@@ -36,6 +36,7 @@ parser.add_argument('--adv_fraction', type=float, default=0.25, help='fraction o
 parser.add_argument('--step_size', type=float, default=0.01, help='kl step size for TRPO')
 parser.add_argument('--gae_lambda', type=float, default=0.97, help='gae_lambda for learner')
 parser.add_argument('--folder', type=str, default=os.environ['HOME'], help='folder to save result in')
+parser.add_argument('--danger', action="store_true")
 
 
 def count_catastrophies(observations):
@@ -124,7 +125,7 @@ for ne in range(n_exps):
         gae_lambda=gae_lambda,
         step_size=step_size,
         is_protagonist=True,
-        use_danger=True
+        use_danger=args.danger
     )
 
     ## Beginning alternating optimization ##
