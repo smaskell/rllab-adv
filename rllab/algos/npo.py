@@ -43,7 +43,7 @@ class Replay_Memory():
 HIDDEN_LAYER_SIZE = 30
 fear_radius = 20
 fear_fade_in = 100000
-fear_factor = 5.0
+fear_factor = 0.0
 
 class DangerModel:
     def __init__(self, state_size):
@@ -214,11 +214,17 @@ class NPO(BatchPolopt):
                 actions += 1
                 self.total_actions += 1
                 scaled_fear_factor = min(fear_factor, fear_factor * self.total_actions / fear_fade_in)
-                fear = scaled_fear_factor * self.danger_model.predict(observation)
+                fear = scaled_fear_factor * self.danger_model.predict(observation)[0]
                 advantage.append(adv - fear)
             # last action has no fear
             advantage.append(old_advantage[-1])
             self.total_actions += 1
+
+        index = 0
+        for old, new in zip(old_advantage, advantage):
+            if old != new:
+                print(old, "!=", new, "at index", index)
+            index+=1
 
         samples_data['advantages'] = np.array(advantage)
 
