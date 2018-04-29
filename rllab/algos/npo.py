@@ -43,7 +43,7 @@ class Replay_Memory():
 HIDDEN_LAYER_SIZE = 30
 fear_radius = 20
 fear_fade_in = 100000
-fear_factor = 0.0
+fear_factor = 5.0
 
 class DangerModel:
     def __init__(self, state_size):
@@ -191,9 +191,9 @@ class NPO(BatchPolopt):
             return
         observations = []
 
-        print("collecting observations from", len(samples_data['paths']), "paths")
+        # print("collecting observations from", len(samples_data['paths']), "paths")
         for path in samples_data['paths']:
-            print("adding", len(path['observations']), "observations")
+            # print("adding", len(path['observations']), "observations")
             observations.append(path['observations'])
 
         old_advantage = samples_data['advantages']
@@ -221,12 +221,12 @@ class NPO(BatchPolopt):
             actions += 1
             self.total_actions += 1
 
-        index = 0
-        for old, new in zip(old_advantage, advantage):
-            if old != new:
-                print(old, "!=", new, "at index", index)
-            index+=1
-        print("matches?", np.all(np.array(old_advantage) == np.array(advantage)))
+        # index = 0
+        # for old, new in zip(old_advantage, advantage):
+        #     if old != new:
+        #         print(old, "!=", new, "at index", index)
+        #     index+=1
+        # print("matches?", np.all(np.array(old_advantage) == np.array(advantage)))
 
         samples_data['advantages'] = np.array(advantage)
 
