@@ -217,7 +217,8 @@ class NPO(BatchPolopt):
                 fear = scaled_fear_factor * self.danger_model.predict(observation)[0]
                 advantage.append(adv - fear)
             # last action has no fear
-            advantage.append(old_advantage[-1])
+            advantage.append(old_advantage[actions])
+            actions += 1
             self.total_actions += 1
 
         index = 0
@@ -225,6 +226,7 @@ class NPO(BatchPolopt):
             if old != new:
                 print(old, "!=", new, "at index", index)
             index+=1
+        print("matches?", np.all(np.array(old_advantage) == np.array(advantage)))
 
         samples_data['advantages'] = np.array(advantage)
 
