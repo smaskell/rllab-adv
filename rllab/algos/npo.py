@@ -201,7 +201,7 @@ class NPO(BatchPolopt):
 
         actions = 0
         for obvs_list in observations:
-            if len(obvs_list) < 200:
+            if len(obvs_list) < 1000:
                 good = obvs_list[:-fear_radius]
                 bad = obvs_list[-fear_radius:]
                 self.danger_states.extend(bad)
