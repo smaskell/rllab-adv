@@ -140,7 +140,7 @@ for ne in range(n_exps):
     ## Shutting down the optimizer ##
     pro_algo.shutdown_worker()
 
-with open('catastrophies-baseline-{}.csv'.format(timestamp), 'w') as file:
+with open('catastrophies-baseline{}-{}.csv'.format("-fear-" if args.danger else "", timestamp), 'w') as file:
     for ep, cat in catastrophies:
         file.write("{}, {}\n".format(ep, cat))
 
