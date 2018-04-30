@@ -1,3 +1,5 @@
+import time
+
 from rllab.algos.trpo import TRPO
 from rllab.baselines.linear_feature_baseline import LinearFeatureBaseline
 from rllab.envs.gym_env import GymEnv
@@ -34,6 +36,7 @@ parser.add_argument('--adv_fraction', type=float, default=0.25, help='fraction o
 parser.add_argument('--step_size', type=float, default=0.01, help='kl step size for TRPO')
 parser.add_argument('--gae_lambda', type=float, default=0.97, help='gae_lambda for learner')
 parser.add_argument('--folder', type=str, default=os.environ['HOME'], help='folder to save result in')
+parser.add_argument('--danger', action="store_true")
 
 
 def count_catastrophies(observations):
@@ -42,6 +45,24 @@ def count_catastrophies(observations):
         if len(episode) < 200:
             catastrophies += 1
     return catastrophies
+
+timestamp = int(time.time())
+
+global catastrophies
+global total_actions
+global num_catastrophies
+catastrophies = [(0, 0)]
+total_actions = 0
+num_catastrophies = 0
+def add_catastrophies(observations):
+    global catastrophies
+    global total_actions
+    global num_catastrophies
+    for episode in observations:
+        total_actions += len(episode)
+        if len(episode) < 200:
+            num_catastrophies += 1
+            catastrophies.append((total_actions, num_catastrophies))
 
 ## Parsing Arguments ##
 args = parser.parse_args()
@@ -162,6 +183,7 @@ for ne in range(n_exps):
         pro_rews += pro_algo.rews; all_rews += pro_algo.rews;
         logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
         logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations), len(pro_algo.observations)))
+        add_catastrophies(pro_algo.observations)
         ## Train Adversary
         adv_algo.train()
         adv_rews += adv_algo.rews; all_rews += adv_algo.rews;
@@ -209,5 +231,9 @@ pickle.dump({'args': args,
              'step_test': step_test_rew_summary,
              'rand_step_test': rand_step_test_rew_summary,
              'adv_test': adv_test_rew_summary}, open(save_name,'wb'))
+
+with open('catastrophies-baseline{}-{}.csv'.format("-fear-" if args.danger else "", timestamp), 'w') as file:
+    for ep, cat in catastrophies:
+        file.write("{}, {}\n".format(ep, cat))
 
 logger.log('\n\n\n#### DONE ####\n\n\n')
