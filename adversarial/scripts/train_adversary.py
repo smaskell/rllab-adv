@@ -140,7 +140,8 @@ for ne in range(n_exps):
         discount=0.995,
         gae_lambda=gae_lambda,
         step_size=step_size,
-        is_protagonist=True
+        is_protagonist=True,
+        use_danger=args.danger
     )
 
     ## Optimizer for the Adversary ##
