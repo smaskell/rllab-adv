@@ -37,6 +37,7 @@ parser.add_argument('--step_size', type=float, default=0.01, help='kl step size 
 parser.add_argument('--gae_lambda', type=float, default=0.97, help='gae_lambda for learner')
 parser.add_argument('--folder', type=str, default=os.environ['HOME'], help='folder to save result in')
 parser.add_argument('--danger', action="store_true")
+parser.add_argument('--no-adv-itr', type=int, default=200)
 
 
 def count_catastrophies(observations):
@@ -189,51 +190,19 @@ for ne in range(n_exps):
         adv_algo.train()
         adv_rews += adv_algo.rews; all_rews += adv_algo.rews;
         logger.log('Advers Reward: {}'.format(np.array(adv_algo.rews).mean()))
-        ## Test the learnt policies
-        const_testing_rews.append(test_const_adv(env, pro_policy, path_length=path_length))
-        rand_testing_rews.append(test_rand_adv(env, pro_policy, path_length=path_length))
-        step_testing_rews.append(test_step_adv(env, pro_policy, path_length=path_length))
-        rand_step_testing_rews.append(test_rand_step_adv(env, pro_policy, path_length=path_length))
-        adv_testing_rews.append(test_learnt_adv(env, pro_policy, adv_policy, path_length=path_length))
 
-        if ni%afterRender==0 and ifRender==True:
-            test_const_adv(env, pro_policy, path_length=path_length, n_traj=1, render=True);
+    pro_algo.adv_policy = zero_adv_policy
+    for ni in range(args.no_adv_itr):
+        logger.log('\n\n\n####expNO{} global itr# {} n_pro_itr# {}####\n\n\n'.format(ne,ni,args.n_pro_itr))
+        ## Train protagonist
+        pro_algo.train()
+        pro_rews += pro_algo.rews; all_rews += pro_algo.rews;
+        logger.log('Protag Reward: {}'.format(np.array(pro_algo.rews).mean()))
+        logger.log('{} catastrophies in {} episodes'.format(count_catastrophies(pro_algo.observations), len(pro_algo.observations)))
+        add_catastrophies(pro_algo.observations)
 
-        if ni!=0 and ni%save_every==0:
-            ## SAVING CHECKPOINT INFO ##
-            pickle.dump({'args': args,
-                         'pro_policy': pro_policy,
-                         'adv_policy': adv_policy,
-                         'zero_test': const_test_rew_summary,
-                         'rand_test': rand_test_rew_summary,
-                         'step_test': step_test_rew_summary,
-                         'rand_step_test': rand_step_test_rew_summary,
-                         'iter_save': ni,
-                         'exp_save': ne,
-                         'adv_test': adv_test_rew_summary}, open(save_name+'.temp','wb'))
 
-    ## Shutting down the optimizer ##
-    pro_algo.shutdown_worker()
-    adv_algo.shutdown_worker()
-
-    ## Updating the test summaries over all training instances
-    const_test_rew_summary.append(const_testing_rews)
-    rand_test_rew_summary.append(rand_testing_rews)
-    step_test_rew_summary.append(step_testing_rews)
-    rand_step_test_rew_summary.append(rand_step_testing_rews)
-    adv_test_rew_summary.append(adv_testing_rews)
-
-## SAVING INFO ##
-pickle.dump({'args': args,
-             'pro_policy': pro_policy,
-             'adv_policy': adv_policy,
-             'zero_test': const_test_rew_summary,
-             'rand_test': rand_test_rew_summary,
-             'step_test': step_test_rew_summary,
-             'rand_step_test': rand_step_test_rew_summary,
-             'adv_test': adv_test_rew_summary}, open(save_name,'wb'))
-
-with open('catastrophies-baseline{}-{}.csv'.format("-fear-" if args.danger else "", timestamp), 'w') as file:
+with open('catastrophies-adversarial{}-{}.csv'.format("-fear" if args.danger else "", timestamp), 'w') as file:
     for ep, cat in catastrophies:
         file.write("{}, {}\n".format(ep, cat))
 
