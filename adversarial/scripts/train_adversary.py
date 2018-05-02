@@ -177,6 +177,8 @@ for ne in range(n_exps):
     adv_testing_rews = []
     adv_testing_rews.append(test_learnt_adv(env, pro_policy, adv_policy, path_length=path_length))
 
+    pro_algo.use_danger = False
+
     ## Beginning alternating optimization ##
     for ni in range(n_itr):
         logger.log('\n\n\n####expNO{} global itr# {} n_pro_itr# {}####\n\n\n'.format(ne,ni,args.n_pro_itr))
@@ -192,6 +194,7 @@ for ne in range(n_exps):
         logger.log('Advers Reward: {}'.format(np.array(adv_algo.rews).mean()))
 
     pro_algo.adv_policy = zero_adv_policy
+    pro_algo.use_danger = args.danger
     for ni in range(args.no_adv_itr):
         logger.log('\n\n\n####expNO{} global itr# {} n_pro_itr# {}####\n\n\n'.format(ne,ni,args.n_pro_itr))
         ## Train protagonist
